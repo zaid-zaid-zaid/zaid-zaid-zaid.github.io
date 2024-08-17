@@ -18,11 +18,11 @@
         </nav>
         <main class="content">
             <div class="header-image">
-                <img src="https://zaid-zaid-zaid.github.io/zaid-zaid-zaid.github.io/resized.jpg" alt="Header image">
+                <img alt="Header image">
             </div>
             <h1 id="zaid-ahmad" class="typewriter">Zaid Ahmad</h1>
             <p>
-                I am a first-year PhD student at Columbia. Previously, I was an
+                I'm a first-year PhD student at Columbia. Previously, I was an
                 undergraduate at Berkeley, and a graduate student at Oxford supported by
                 a <a href="https://www.jesus.ox.ac.uk/study-here/graduate-studies/admissions/finance/peter-thomason-studentship/" class="links" target="_blank">Peter Thomason Studentship</a>. My research interests are in probability, statistics,
                 and algorithms, broadly defined. I also enjoy surfing, marathon running,
@@ -35,5 +35,14 @@
             </div>
         </main>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var img = document.querySelector('.header-image img');
+            var path = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'resized.jpg'  // Local path
+                : '/zaid-zaid-zaid.github.io/resized.jpg';  // GitHub Pages path
+            img.src = path;
+        });
+    </script>
 </body>
 </html>
