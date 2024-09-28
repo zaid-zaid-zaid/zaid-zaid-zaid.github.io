@@ -1,0 +1,231 @@
+
+---
+title: "Comprehensive Linear Regression Tutorial with Additional Code"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+In this notebook, we'll perform linear regression analysis on the `iris` dataset. We'll walk through data manipulation, model fitting, handling categorical variables, interaction terms, model diagnostics, visualizing confidence intervals, and calculating some basic statistical steps. Hopefully this is a decent walkthrough of the sorts of code you'll be writing in this course.
+
+## 1. Loading the Iris Dataset
+
+```{r}
+# Load the iris dataset
+data(iris)
+
+# Rename columns for clarity
+colnames(iris) <- c("Sepal_Length", "Sepal_Width", "Petal_Length", "Petal_Width", "Species")
+
+# Preview the first few rows
+head(iris)
+```
+
+## 2. Data Manipulation
+
+In this section, we’ll demonstrate data manipulation techniques such as creating new variables, filtering, splitting data, and handling categorical variables using the `factor()` function.
+
+### a. Creating New Variables
+
+First, lets create a new column in our dataset called `Sepal_Area`, which is the product of `Sepal_Length` and `Sepal_Width`.
+
+```{r}
+# Create a new column 'Sepal_Area'
+iris$Sepal_Area <- iris$Sepal_Length * iris$Sepal_Width
+
+# Preview the new data
+head(iris)
+```
+
+### b. Handling Categorical Variables Using the Factor Function
+
+The `Species` column in the `iris` dataset is a categorical variable. In R, categorical variables are often treated as **factors**. Using the `factor()` function, you can ensure that R correctly interprets and uses these variables in models.
+
+```{r}
+# Ensure that Species is a factor
+iris$Species <- factor(iris$Species)
+
+# Check the structure to confirm Species is a factor
+str(iris)
+```
+
+### c. Filtering Data for Specific Species
+
+We can also filter the dataset to include only the species `setosa` for the linear model.
+
+```{r}
+# Filter for species 'setosa'
+iris_setosa <- subset(iris, Species == "setosa")
+
+# Preview filtered data
+head(iris_setosa)
+```
+
+### d. Splitting Data into Training and Testing Sets
+
+Sometimes you might want to split data based off of certain characteristics. Below, we'll split the filtered dataset into training (70%) and testing (30%) sets to evaluate the model.
+
+```{r}
+# Set seed for reproducibility
+set.seed(123)
+
+# Split data: 70% training, 30% testing
+train_indices <- sample(1:nrow(iris_setosa), size = 0.7 * nrow(iris_setosa))
+train_data <- iris_setosa[train_indices, ]
+test_data <- iris_setosa[-train_indices, ]
+
+# Preview training and testing data
+head(train_data)
+head(test_data)
+```
+
+## 3. Fitting Linear Models
+
+### a. Fitting an Initial Linear Model 
+
+We’ll fit a linear regression model to predict `Sepal_Length` using `Sepal_Width` and `Petal_Length` as predictors on the `setosa` species.
+
+```{r}
+# Fit a linear regression model
+model <- lm(Sepal_Length ~ Sepal_Width + Petal_Length, data = iris_setosa)
+
+# Summarize the model
+summary(model)
+```
+
+### b. Including Categorical Variables in Linear Models
+
+When you include a factor variable in a linear regression model, R will automatically create **dummy variables** for each level of the factor. Let’s include `Species` in a linear regression model and see what that looks like.
+
+```{r}
+# Fit a linear model with Species as a factor
+model_with_species <- lm(Sepal_Length ~ Sepal_Width + Petal_Length + Species, data = iris)
+
+# Summarize the model
+summary(model_with_species)
+```
+
+So, R automatically picks one level of the factor (e.g., "setosa") as a **baseline**, and the other levels (e.g., "versicolor", "virginica") are compared against it.
+
+## 4. Extracting Model Coefficients and Confidence Intervals
+
+Below we extract the coefficients from the model defined in 3a and compute confidence intervals for the regression coefficients.
+
+```{r}
+# Extract coefficients and confidence intervals
+coefficients <- coef(model)
+conf_intervals <- confint(model)
+
+# Print coefficients and confidence intervals
+coefficients
+conf_intervals
+```
+
+## 5. Making Predictions with Confidence and Prediction Intervals
+
+We can also use the fitted model to make predictions for new data points and generate both confidence and prediction intervals.
+
+```{r}
+# New data for prediction
+new_data <- data.frame(Sepal_Width = c(3.5, 3.0), Petal_Length = c(1.5, 1.3))
+
+# Make predictions with confidence intervals
+predictions <- predict(model, newdata = new_data, interval = "confidence")
+
+# Make predictions with prediction intervals
+predictions_with_intervals <- predict(model, newdata = new_data, interval = "prediction")
+
+# Print the predictions
+predictions
+predictions_with_intervals
+```
+
+## 6. Evaluating the Model on Testing Data
+
+In the future, you'll often want to evaluate how good your predicted values from a model are relative to the actual values in your data. We now evaluate how well the model performs by comparing predictions on the test data against actual values.
+
+```{r}
+# Fit the model on training data
+train_model <- lm(Sepal_Length ~ Sepal_Width + Petal_Length, data = train_data)
+
+# Predict on the test data
+test_predictions <- predict(train_model, newdata = test_data)
+
+# Compare predictions with actual values
+comparison <- data.frame(Actual = test_data$Sepal_Length, Predicted = test_predictions)
+
+# Print comparison
+print(comparison)
+```
+
+## 7. Visualizing the Model with ggplot2
+
+### a. Plotting Sepal Length vs. Sepal Width
+
+`ggplot` is a great library for plotting. Let's first visualize relationship between `Sepal_Width` and `Sepal_Length` for the `setosa` species, along with the regression line and confidence intervals.
+
+```{r, warning=FALSE, message=FALSE}
+# Load ggplot2 package
+library(ggplot2)
+
+# Plot with ggplot2
+ggplot(iris_setosa, aes(x = Sepal_Width, y = Sepal_Length)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(title = "Linear Regression of Sepal Length on Sepal Width",
+       x = "Sepal Width", y = "Sepal Length")
+```
+
+### b. Plotting Sepal Length vs. Petal Length
+
+Similarly, we can also visualize the relationship between `Petal_Length` and `Sepal_Length`.
+
+```{r}
+ggplot(iris_setosa, aes(x = Petal_Length, y = Sepal_Length)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(title = "Linear Regression of Sepal Length on Petal Length",
+       x = "Petal Length", y = "Sepal Length")
+```
+
+## 8. Running Statistical Tests
+
+Next, we’ll run common statistical tests like **t-tests** and **f-tests** to evaluate our model and data.
+
+### a. T-Test
+
+A **t-test** helps us evaluate whether there is a significant difference between the means of two groups. We can use it to compare the `Sepal.Length` for two species, say `setosa` and `versicolor`.
+
+```{r}
+# Subset data for setosa and versicolor species
+setosa <- subset(iris, Species == "setosa")
+versicolor <- subset(iris, Species == "versicolor")
+
+# Perform a t-test to compare Sepal.Length between setosa and versicolor
+t_test_result <- t.test(setosa$Sepal_Length, versicolor$Sepal_Length)
+
+# Print t-test results
+t_test_result
+```
+
+### b. F-Test (ANOVA)
+
+An **f-test** (or ANOVA) helps us determine whether there are significant differences between the means of three or more groups. In this case, we’ll use ANOVA to test whether the means of `Sepal.Length` differ significantly across all three species.
+
+```{r}
+# Perform ANOVA to test if Sepal.Length differs by Species
+anova_result <- aov(Sepal_Length ~ Species, data = iris)
+
+# Summarize the ANOVA results
+summary(anova_result)
+```
+
+The output of the ANOVA will show an F-statistic and p-value to indicate whether the means of `Sepal.Length` are significantly different between the species.
