@@ -1,6 +1,6 @@
 
 ---
-title: "Comprehensive Linear Regression Tutorial with Additional Code"
+title: "Regression in R"
 output:
   html_document:
     df_print: paged
