@@ -1,0 +1,10 @@
+exclude:
+  - teaching.html
+  - archived/teaching.html
+  - stat4205.html
+  - stat4205_2.html
+  - Lecture_02.pdf
+  - Linear_Models_Practice_Midterm.pdf
+  - R_tutorial.Rmd
+  - R_tutorial.nb.html
+  - Test_Statistic_Notes.pdf
